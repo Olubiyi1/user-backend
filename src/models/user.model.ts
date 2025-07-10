@@ -11,6 +11,7 @@ const userSchema: Schema = new mongoose.Schema(
       type: String,
       required: [true, "enter an email"],
       unique: true,
+      lowercase:true
     },
     password: {
       type: String,
