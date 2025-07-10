@@ -4,7 +4,7 @@ class ResponseHandler{
     static success(
         res:Response,
         data:any,
-        message:"user successfully created",
+        message:string,
         statusCode: number = 200
     ):
     void{

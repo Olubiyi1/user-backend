@@ -17,6 +17,18 @@ const userSchema: Schema = new mongoose.Schema(
       type: String,
       required: [true, "enter password"],
     },
+    isVerified: {
+      type : Boolean,
+      default : false
+    },
+    verificationCode:{
+      type : String,
+      select: false
+    },
+    verificationCodeValidation:{
+      type: Date,
+      select: false
+    }
   },
   { timestamps: true }
 );
