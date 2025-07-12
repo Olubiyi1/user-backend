@@ -3,6 +3,10 @@ import mongoose, { Schema, Document } from "mongoose";
 export interface IUser extends Document {
   email: string;
   password: string;
+  isVerified: boolean;
+  verificationToken?: string;
+  verificationCodeValidation: Date;
+  verificationTokenExpires?: Date;
 }
 
 const userSchema: Schema = new mongoose.Schema(
@@ -11,28 +15,31 @@ const userSchema: Schema = new mongoose.Schema(
       type: String,
       required: [true, "enter an email"],
       unique: true,
-      lowercase:true
+      lowercase: true,
     },
     password: {
       type: String,
       required: [true, "enter password"],
     },
     isVerified: {
-      type : Boolean,
-      default : false
+      type: Boolean,
+      default: false,
     },
-    verificationCode:{
-      type : String,
-      select: false
+    verificationToken: {
+      type: String,
+      select: false,
     },
-    verificationCodeValidation:{
+    verificationCodeValidation: {
       type: Date,
-      select: false
+      select: false,
+    },
+    verificationTokenExpires:{
+      type:Date
     }
   },
   { timestamps: true }
 );
 
-const userModel = mongoose.model<IUser>("User",userSchema)
+const userModel = mongoose.model<IUser>("User", userSchema);
 
 export default userModel;

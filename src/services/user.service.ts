@@ -1,8 +1,11 @@
 import userModel, { IUser } from "../models/user.model";
 import { comparePassword, hashPassword } from "../guards/user.guards";
+import crypto from "crypto";
+import { sendVerifcationEmail } from "../helpers/sendVerificationEmail";
 
 export const createUser = async (userData: IUser) => {
   try {
+    // check if email doesn't exist before registration
     const existingUser = await userModel.findOne({ email: userData.email });
     if (existingUser) {
       return { error: "email already exists", data: null };
@@ -11,17 +14,31 @@ export const createUser = async (userData: IUser) => {
     // hash password
     const password = hashPassword(userData.password);
 
-    // generate verifcatio token
+    // generate verifcation token
+    const verificationToken = crypto.randomBytes(32).toString("hex");
 
     // create a new user
-    const newUser = new userModel({ ...userData, password });
+    const newUser = new userModel({
+      ...userData,
+      password,
+      verificationToken,
+      verificationTokenExpires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      isVerified: false,
+    });
 
     // saving new user
     const savedUser = await newUser.save();
 
-    return { error: null, data: savedUser };
+    // send verification email
+    await sendVerifcationEmail(savedUser.email, verificationToken);
+
+    return {
+      error: null,
+      data: savedUser,
+      message: "user registered, check email to verify",
+    };
   } catch (error) {
-    return { error: "registration failed" };
+    return { error: "registration failed", data: null };
   }
 };
 
