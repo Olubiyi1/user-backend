@@ -2,6 +2,7 @@ import userModel, { IUser } from "../models/user.model";
 import { comparePassword, hashPassword } from "../guards/user.guards";
 import crypto from "crypto";
 import { sendVerifcationEmail } from "../helpers/sendVerificationEmail";
+import { createJwt } from "../guards/user.guards";
 
 export const createUser = async (userData: IUser) => {
   try {
@@ -49,12 +50,34 @@ export const userLogin = async (email: string, password: string) => {
     if (!user) {
       return { error: "user doesn't exist", data: null };
     }
+
+    // is user verified
+
+    if (!user.isVerified) {
+      return {
+        error: "Kindly verify your email before logging in",
+        data: null,
+      };
+    }
+
     // verify passord match
     const isPasswordMatch = await comparePassword(password, user.password);
     if (!isPasswordMatch) {
       return { error: "invalid email or password", data: null };
     }
+
+    // createJwt
+    const token = createJwt({
+      id: user.id,
+      email: user.email,
+    });
+
+    return { error: null, data: token, message: "sign in successful" };
   } catch (error: any) {
     return { error: error.message };
   }
 };
+
+export const signOut  = ()=>{
+  
+}

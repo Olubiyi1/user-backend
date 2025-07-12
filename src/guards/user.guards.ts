@@ -17,10 +17,10 @@ export const createJwt = (user:any)=>{
     const token = jwt.sign(
         {
             id: user._id,
-            email: user.email
+            email: user.email,
         },
         config.SECRET_KEY,
-        {expiresIn:"1d"}
+        {expiresIn:"8h"}
     );
     return token;
 }

@@ -1,3 +1,4 @@
+// import { string } from "joi";
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface IUser extends Document {
@@ -7,6 +8,7 @@ export interface IUser extends Document {
   verificationToken?: string;
   verificationCodeValidation: Date;
   verificationTokenExpires?: Date;
+  role : "user" | "admin"
 }
 
 const userSchema: Schema = new mongoose.Schema(
@@ -35,6 +37,11 @@ const userSchema: Schema = new mongoose.Schema(
     },
     verificationTokenExpires:{
       type:Date
+    },
+    role:{
+      type: String,
+      enum:["user", "admin"],
+      default: "user"
     }
   },
   { timestamps: true }
