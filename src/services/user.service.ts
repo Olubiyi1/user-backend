@@ -8,6 +8,23 @@ export const createUser = async (userData: IUser) => {
   try {
     // check if email doesn't exist before registration
     const existingUser = await userModel.findOne({ email: userData.email });
+
+    // If user already exists but not verified → resend verification token
+    if (existingUser && !existingUser.isVerified) {
+      const newToken = crypto.randomBytes(32).toString("hex");
+      existingUser.verificationToken = newToken;
+      existingUser.verificationTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
+
+      await existingUser.save();
+      await sendVerifcationEmail(existingUser.email, newToken);
+
+      return {
+        error: null,
+        data: null,
+        message: "Account already exists but not verified. A new verification link has been sent.",
+      };
+    }
+    // if user registed and verified.this blocks new registration
     if (existingUser) {
       return { error: "email already exists", data: null };
     }
