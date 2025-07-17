@@ -13,7 +13,9 @@ export const createUser = async (userData: IUser) => {
     if (existingUser && !existingUser.isVerified) {
       const newToken = crypto.randomBytes(32).toString("hex");
       existingUser.verificationToken = newToken;
-      existingUser.verificationTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
+      existingUser.verificationTokenExpires = new Date(
+        Date.now() + 24 * 60 * 60 * 1000
+      ); // 24h
 
       await existingUser.save();
       await sendVerifcationEmail(existingUser.email, newToken);
@@ -21,7 +23,8 @@ export const createUser = async (userData: IUser) => {
       return {
         error: null,
         data: null,
-        message: "Account already exists but not verified. A new verification link has been sent.",
+        message:
+          "Account already exists but not verified. A new verification link has been sent.",
       };
     }
     // if user registed and verified.this blocks new registration
@@ -95,6 +98,31 @@ export const userLogin = async (email: string, password: string) => {
   }
 };
 
-export const signOut  = ()=>{
-  
-}
+export const forgotPassword = async (email) => {
+  // search if user exists
+  const user = await userModel.findOne({ email });
+  if (!user) {
+    return { error: "User doesnt exit", data: null };
+  }
+
+  // generate reset tokenn
+  const resetToken = crypto.randomBytes(32).toString("hex");
+
+  // hash the generated token
+
+  const hashedToken = crypto
+    .createHash("sha256")
+    .update(resetToken)
+    .digest("hex");
+
+  // attaching the reset token to the user
+  user.passwordResetToken = hashedToken;
+  user.passwordResetExpires = new Date(Date.now() + 10 * 60 * 1000);
+
+  // Save the user without triggering full validation
+
+  await user.save({ validateBeforeSave: false });
+
+  // Return the plain token (not the hashed one)
+  return { error: null, data: resetToken };
+};

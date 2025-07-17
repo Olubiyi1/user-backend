@@ -8,7 +8,9 @@ export interface IUser extends Document {
   verificationToken?: string;
   verificationCodeValidation: Date;
   verificationTokenExpires?: Date;
-  role : "user" | "admin"
+  role : "user" | "admin",
+  passwordResetToken?: string;
+  passwordResetExpires?: Date;
 }
 
 const userSchema: Schema = new mongoose.Schema(
@@ -42,7 +44,13 @@ const userSchema: Schema = new mongoose.Schema(
       type: String,
       enum:["user", "admin"],
       default: "user"
-    }
+    },
+     passwordResetToken: {
+    type: String,
+  },
+  passwordResetExpires: {
+    type: Date,
+  }
   },
   { timestamps: true }
 );
