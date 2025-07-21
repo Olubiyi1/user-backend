@@ -1,7 +1,7 @@
 import userModel, { IUser } from "../models/user.model";
 import { comparePassword, hashPassword } from "../guards/user.guards";
 import crypto from "crypto";
-import { sendVerifcationEmail } from "../helpers/sendVerificationEmail";
+import { sendResetPasswordEmal, sendVerifcationEmail } from "../helpers/emailHelper";
 import { createJwt } from "../guards/user.guards";
 
 export const createUser = async (userData: IUser) => {
@@ -98,15 +98,17 @@ export const userLogin = async (email: string, password: string) => {
   }
 };
 
-export const forgotPassword = async (email) => {
+export const forgotPassword = async (email : string) => {
   // search if user exists
   const user = await userModel.findOne({ email });
   if (!user) {
-    return { error: "User doesnt exit", data: null };
+    return { error: "User doesn't exist", data: null };
   }
 
   // generate reset tokenn
   const resetToken = crypto.randomBytes(32).toString("hex");
+
+  await sendResetPasswordEmal(user.email,resetToken)
 
   // hash the generated token
 

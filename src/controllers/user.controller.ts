@@ -1,4 +1,4 @@
-import { createUser, userLogin } from "../services/user.service";
+import { createUser, forgotPassword, userLogin } from "../services/user.service";
 import ResponseHandler from "../utils/responseHandler";
 import { Response, Request } from "express";
 
@@ -55,3 +55,27 @@ export const loginUser = async (req: Request, res: Response) => {
     return ResponseHandler.validationError(res, null, "login unsuccessful");
   }
 };
+
+export const forgotUserPassword = async(req: Request, res: Response)=>{
+try{
+const {email} = req.body;
+// validates the input
+if(!email){
+  return ResponseHandler.validationError(res,null,"email must be provided")
+}
+
+// calls the forgot user service to confirm email after destructuring
+
+const {error, data: resetToken} = await forgotPassword(email);
+if(error){
+return ResponseHandler.validationError(res,null,"user not found")
+}
+// build a reset urk
+const resetUrl = `https://myfrontend.com/reset-password/${resetToken}`;
+
+return ResponseHandler.success(res,{resetToken,resetUrl},"password reset link sent")
+}
+catch(error){
+  return ResponseHandler.error(res,null,"an internal error occured")
+}
+}
