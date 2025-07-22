@@ -12,7 +12,7 @@ export interface IUser extends Document {
   passwordResetToken?: string;
   passwordResetExpires?: Date;
 }
-
+// user schema
 const userSchema: Schema = new mongoose.Schema(
   {
     email: {

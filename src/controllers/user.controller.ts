@@ -1,7 +1,13 @@
-import { createUser, forgotPassword, userLogin } from "../services/user.service";
+import {
+  createUser,
+  forgotPassword,
+  resetPassword,
+  userLogin,
+} from "../services/user.service";
 import ResponseHandler from "../utils/responseHandler";
 import { Response, Request } from "express";
 
+// register user
 export const registerUser = async (req: Request, res: Response) => {
   try {
     const { error, data } = await createUser(req.body);
@@ -16,8 +22,6 @@ export const registerUser = async (req: Request, res: Response) => {
     return ResponseHandler.validationError(res, null, error.message);
   }
 };
-
-
 
 export const loginUser = async (req: Request, res: Response) => {
   try {
@@ -56,26 +60,55 @@ export const loginUser = async (req: Request, res: Response) => {
   }
 };
 
-export const forgotUserPassword = async(req: Request, res: Response)=>{
-try{
-const {email} = req.body;
-// validates the input
-if(!email){
-  return ResponseHandler.validationError(res,null,"email must be provided")
-}
+export const forgotUserPassword = async (req: Request, res: Response) => {
+  try {
+    const { email } = req.body;
+    // validates the input
+    if (!email) {
+      return ResponseHandler.validationError(
+        res,
+        null,
+        "email must be provided"
+      );
+    }
 
-// calls the forgot user service to confirm email after destructuring
+    // calls the forgot user service to confirm email after destructuring
 
-const {error, data: resetToken} = await forgotPassword(email);
-if(error){
-return ResponseHandler.validationError(res,null,"user not found")
-}
-// build a reset urk
-const resetUrl = `https://myfrontend.com/reset-password/${resetToken}`;
+    const { error, data: resetToken } = await forgotPassword(email);
+    if (error) {
+      return ResponseHandler.validationError(res, null, "user not found");
+    }
+    // build a reset urk
+    const resetUrl = `https://myfrontend.com/reset-password/${resetToken}`;
 
-return ResponseHandler.success(res,{resetToken,resetUrl},"password reset link sent")
-}
-catch(error){
-  return ResponseHandler.error(res,null,"an internal error occured")
-}
-}
+    return ResponseHandler.success(
+      res,
+      { resetToken, resetUrl },
+      "password reset link sent"
+    );
+  } catch (error) {
+    return ResponseHandler.error(res, null, "an internal error occured");
+  }
+};
+
+export const reserUserPassword = async (req: Request, res: Response) => {
+  try {
+    const { token } = req.params;
+    const { newPassword } = req.body;
+
+    if (!newPassword) {
+      return ResponseHandler.validationError(
+        res,
+        null,
+        "new password is required"
+      );
+    }
+
+    const { error, data } = await resetPassword(token, newPassword);
+
+    if (error) {
+      return ResponseHandler.validationError(res, null, error);
+    }
+    return ResponseHandler.success(res, data, "passwword reset successful");
+  } catch (error) {}
+};

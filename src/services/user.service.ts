@@ -1,7 +1,10 @@
 import userModel, { IUser } from "../models/user.model";
 import { comparePassword, hashPassword } from "../guards/user.guards";
 import crypto from "crypto";
-import { sendResetPasswordEmal, sendVerifcationEmail } from "../helpers/emailHelper";
+import {
+  sendResetPasswordEmal,
+  sendVerifcationEmail,
+} from "../helpers/emailHelper";
 import { createJwt } from "../guards/user.guards";
 
 export const createUser = async (userData: IUser) => {
@@ -63,6 +66,7 @@ export const createUser = async (userData: IUser) => {
   }
 };
 
+// login service
 export const userLogin = async (email: string, password: string) => {
   try {
     //  find user by email first
@@ -98,7 +102,8 @@ export const userLogin = async (email: string, password: string) => {
   }
 };
 
-export const forgotPassword = async (email : string) => {
+// forgot password
+export const forgotPassword = async (email: string) => {
   // search if user exists
   const user = await userModel.findOne({ email });
   if (!user) {
@@ -108,7 +113,7 @@ export const forgotPassword = async (email : string) => {
   // generate reset tokenn
   const resetToken = crypto.randomBytes(32).toString("hex");
 
-  await sendResetPasswordEmal(user.email,resetToken)
+  await sendResetPasswordEmal(user.email, resetToken);
 
   // hash the generated token
 
@@ -127,4 +132,36 @@ export const forgotPassword = async (email : string) => {
 
   // Return the plain token (not the hashed one)
   return { error: null, data: resetToken };
+};
+
+// reset password
+export const resetPassword = async (token: string, newPassword: string) => {
+  try {
+    // hash incoming token
+    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+
+    // find user with matching reset token and valid reset time
+    const user = await userModel.findOne({
+      passwordResetToken: hashedToken,
+      passwordResetExpires: { $gt: Date.now() },
+    });
+    if (!user) {
+      return { error: "invalid user or passord expires", data: null };
+    }
+    // hash new password
+    const hashedPassword = await hashPassword(newPassword);
+    // update user password
+    user.password = hashedPassword;
+
+    // clear passwordResetToken and time
+    user.passwordResetToken = undefined;
+    user.passwordResetExpires = undefined;
+
+    // save user
+    await user.save();
+
+    return { error: null, data: "Password reset successful" };
+  } catch (error: any) {
+    return { error: error.message };
+  }
 };
