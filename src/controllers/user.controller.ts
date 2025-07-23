@@ -1,3 +1,4 @@
+import { resendVerification } from "../services/resendVerification.service";
 import {
   createUser,
   forgotPassword,
@@ -8,22 +9,46 @@ import ResponseHandler from "../utils/responseHandler";
 import { Response, Request } from "express";
 
 // register user
-export const registerUser = async (req: Request, res: Response) => {
+export const registerUserController = async (req: Request, res: Response) => {
   try {
     const { error, data } = await createUser(req.body);
+    if (error === "email already exists") {
+      
+      const {error: resendError} = await resendVerification(req.body)
+
+      if(resendError){
+        return ResponseHandler.validationError(res,null,resendError)
+      }
+
+      return ResponseHandler.success(res,null,"verifcation resent successfully")
+    }
+   // Step 3: If user creation failed for another reason
     if (error) {
       return ResponseHandler.validationError(res, null, error);
     }
-    if (!data) {
-      return ResponseHandler.validationError(res, null, "user data not found");
-    }
-    return ResponseHandler.success(res, data, "user successfully created");
+    return ResponseHandler.success(res, data, "user successfully created,check your mail to verify");
   } catch (error: any) {
     return ResponseHandler.validationError(res, null, error.message);
   }
 };
 
-export const loginUser = async (req: Request, res: Response) => {
+// resend verification
+export const resendVerificationController = async (req: Request, res: Response) => {
+  try {
+    const { error } = await resendVerification(req.body);
+
+    if (error) {
+      return ResponseHandler.validationError(res, null, error);
+    }
+
+    return ResponseHandler.success(res, null, "Verification mail resent successfully");
+  } catch (err: any) {
+    return ResponseHandler.validationError(res, null, err.message);
+  }
+};
+
+
+export const loginUserController = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
 
@@ -60,7 +85,8 @@ export const loginUser = async (req: Request, res: Response) => {
   }
 };
 
-export const forgotUserPassword = async (req: Request, res: Response) => {
+// forgot password
+export const forgotUserPasswordController = async (req: Request, res: Response) => {
   try {
     const { email } = req.body;
     // validates the input
@@ -78,7 +104,7 @@ export const forgotUserPassword = async (req: Request, res: Response) => {
     if (error) {
       return ResponseHandler.validationError(res, null, "user not found");
     }
-    // build a reset urk
+    // build a reset url
     const resetUrl = `https://myfrontend.com/reset-password/${resetToken}`;
 
     return ResponseHandler.success(
@@ -91,7 +117,8 @@ export const forgotUserPassword = async (req: Request, res: Response) => {
   }
 };
 
-export const reserUserPassword = async (req: Request, res: Response) => {
+// reset user password controller
+export const resetUserPasswordController = async (req: Request, res: Response) => {
   try {
     const { token } = req.params;
     const { newPassword } = req.body;

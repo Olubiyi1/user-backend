@@ -2,9 +2,7 @@
 import { Request, Response } from "express";
 import userModel from "../models/user.model";
 import ResponseHandler from "../utils/responseHandler";
-// import crypto from "crypto"
-// import bcrypt from "bcrypt"
-// import emailTransporter from "../helpers/emailTransporter";
+
 
 
 export const verifyEmail = async (req: Request, res: Response) => {

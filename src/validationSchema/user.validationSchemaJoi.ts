@@ -4,7 +4,7 @@ import Joi from "joi";
 interface UserRegistration {
   email: string;
   password: string;
-  role: string
+  role: string;
 }
 
 // validation schema
@@ -32,12 +32,12 @@ export const registerUserValidationSchema: Joi.ObjectSchema<UserRegistration> =
         "string.pattern.base":
           "password must contain lowercase,uppercase,digit,special characters",
       }),
-      role: Joi.string()
-    .valid("user", "admin") // only allow "user" or "admin"
-    .optional()
-    .messages({
-      "any.only": "Role must be either 'user' or 'admin'",
-    }),
+    role: Joi.string()
+      .valid("user", "admin") // only allow "user" or "admin"
+      .optional()
+      .messages({
+        "any.only": "Role must be either 'user' or 'admin'",
+      }),
   });
 
 export const loginValidationSchema: Joi.ObjectSchema<UserRegistration> =
@@ -46,3 +46,9 @@ export const loginValidationSchema: Joi.ObjectSchema<UserRegistration> =
 
     password: Joi.string().trim().required(),
   });
+
+export const resetPasswordSchema: Joi.ObjectSchema<UserRegistration> =
+  Joi.object({
+    password: Joi.string().trim().required(),
+  });
+
