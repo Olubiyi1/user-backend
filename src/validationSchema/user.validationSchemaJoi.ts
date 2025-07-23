@@ -51,4 +51,8 @@ export const resetPasswordSchema: Joi.ObjectSchema<UserRegistration> =
   Joi.object({
     password: Joi.string().trim().required(),
   });
+export const forgotPasswordSchema: Joi.ObjectSchema<UserRegistration> =
+  Joi.object({
+  email: Joi.string().email().required().trim().lowercase(),
+  });
 

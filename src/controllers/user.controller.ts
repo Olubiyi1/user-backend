@@ -99,7 +99,6 @@ export const forgotUserPasswordController = async (req: Request, res: Response) 
     }
 
     // calls the forgot user service to confirm email after destructuring
-
     const { error, data: resetToken } = await forgotPassword(email);
     if (error) {
       return ResponseHandler.validationError(res, null, "user not found");
