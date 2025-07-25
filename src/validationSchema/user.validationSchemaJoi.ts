@@ -49,7 +49,10 @@ export const loginValidationSchema: Joi.ObjectSchema<UserRegistration> =
 
 export const resetPasswordSchema: Joi.ObjectSchema<UserRegistration> =
   Joi.object({
-    password: Joi.string().trim().required(),
+
+    newPassword: Joi.string().trim().required(),
+    confirmPassword: Joi.any().valid(Joi.ref("newPassword")).required()
+    .messages({"any.only": "password do not match"})
   });
 export const forgotPasswordSchema: Joi.ObjectSchema<UserRegistration> =
   Joi.object({

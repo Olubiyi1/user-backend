@@ -135,6 +135,6 @@ export const resetUserPasswordController = async (req: Request, res: Response) =
     if (error) {
       return ResponseHandler.validationError(res, null, error);
     }
-    return ResponseHandler.success(res, data, "passwword reset successful");
+    return ResponseHandler.success(res,data,"passwword reset successful");
   } catch (error) {}
 };
